@@ -8,6 +8,10 @@ import fr.nrobeveille.tvlauncher.data.AppInfo
 import fr.nrobeveille.tvlauncher.data.AppRepository
 import fr.nrobeveille.tvlauncher.data.LauncherSettings
 import fr.nrobeveille.tvlauncher.data.SettingsRepository
+import fr.nrobeveille.tvlauncher.update.UpdateEvents
+import fr.nrobeveille.tvlauncher.update.UpdateException
+import fr.nrobeveille.tvlauncher.update.UpdateInfo
+import fr.nrobeveille.tvlauncher.update.Updater
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +21,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+/** État de la mise à jour, affiché dans les paramètres. */
+sealed interface UpdateState {
+    data object Idle : UpdateState
+    data object Checking : UpdateState
+    data object UpToDate : UpdateState
+    data class Available(val info: UpdateInfo) : UpdateState
+    data class Downloading(val info: UpdateInfo, val progress: Float) : UpdateState
+    data object Installing : UpdateState
+    data class Error(val message: String, val info: UpdateInfo? = null) : UpdateState
+}
 
 /** Écrans du launcher (navigation simple par pile, sans bibliothèque). */
 sealed interface Screen {
@@ -182,6 +197,93 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             val defaults = defaultFavorites(apps)
             _favorites.value = defaults
             settingsRepository.setFavorites(defaults)
+        }
+    }
+
+    // --- Mise à jour --------------------------------------------------------
+
+    val updater = Updater(application)
+
+    private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
+    val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
+
+    private var updateJob: Job? = null
+    private var lastUpdateCheck = 0L
+    private var lastInstallInfo: UpdateInfo? = null
+
+    init {
+        // Échec d'installation remonté par InstallResultReceiver.
+        viewModelScope.launch {
+            UpdateEvents.installError.collect { message ->
+                if (message != null) {
+                    _updateState.value = UpdateState.Error(message, lastInstallInfo)
+                }
+            }
+        }
+        // Vérification discrète au démarrage (pastille sur la roue dentée).
+        checkForUpdate(silent = true)
+    }
+
+    /**
+     * Cherche une nouvelle version. En mode silencieux (au démarrage), une erreur
+     * réseau n'est pas affichée et on ne revérifie pas plus d'une fois toutes les 6 h.
+     */
+    fun checkForUpdate(silent: Boolean = false) {
+        if (updateJob?.isActive == true) return
+        val now = System.currentTimeMillis()
+        if (silent && now - lastUpdateCheck < 6 * 60 * 60 * 1000L) return
+        lastUpdateCheck = now
+        updateJob = viewModelScope.launch {
+            if (!silent) _updateState.value = UpdateState.Checking
+            _updateState.value = try {
+                val info = updater.findUpdate()
+                if (info != null) UpdateState.Available(info) else UpdateState.UpToDate
+            } catch (e: UpdateException) {
+                if (silent) UpdateState.Idle else UpdateState.Error(e.message.orEmpty())
+            } catch (e: Exception) {
+                if (silent) UpdateState.Idle else UpdateState.Error("Vérification impossible")
+            }
+        }
+    }
+
+    /** Télécharge et installe la version disponible. */
+    fun installUpdate(context: Context) {
+        val info = when (val state = _updateState.value) {
+            is UpdateState.Available -> state.info
+            is UpdateState.Error -> state.info ?: return checkForUpdate()
+            else -> return
+        }
+        if (!updater.canInstall()) {
+            val opened = updater.openInstallPermissionScreen(context)
+            _updateState.value = UpdateState.Error(
+                if (opened) {
+                    "Autorise « Launcher TV » à installer des applis, puis relance la mise à jour"
+                } else {
+                    "Autorise l'installation avec adb : adb shell appops set " +
+                        "${context.packageName} REQUEST_INSTALL_PACKAGES allow"
+                },
+                info,
+            )
+            return
+        }
+        if (updateJob?.isActive == true) return
+        UpdateEvents.clear()
+        lastInstallInfo = info
+        updateJob = viewModelScope.launch {
+            try {
+                _updateState.value = UpdateState.Downloading(info, 0f)
+                val apk = updater.download(info) { progress ->
+                    _updateState.value = UpdateState.Downloading(info, progress)
+                }
+                _updateState.value = UpdateState.Installing
+                updater.install(apk)
+                // La suite se passe dans InstallResultReceiver : en cas de succès,
+                // Android remplace l'appli et la relance.
+            } catch (e: UpdateException) {
+                _updateState.value = UpdateState.Error(e.message.orEmpty(), info)
+            } catch (e: Exception) {
+                _updateState.value = UpdateState.Error("Échec du téléchargement", info)
+            }
         }
     }
 

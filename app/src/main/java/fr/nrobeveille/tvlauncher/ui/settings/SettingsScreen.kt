@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import fr.nrobeveille.tvlauncher.LauncherViewModel
 import fr.nrobeveille.tvlauncher.Screen
+import fr.nrobeveille.tvlauncher.UpdateState
 import fr.nrobeveille.tvlauncher.data.LauncherSettings
 import fr.nrobeveille.tvlauncher.ui.components.ActionMenu
 import fr.nrobeveille.tvlauncher.ui.components.FocusRegistry
@@ -43,6 +44,7 @@ private class Entry(
     val subtitle: String? = null,
     val value: String? = null,
     val chevron: Boolean = false,
+    val highlighted: Boolean = false,
     val onClick: () -> Unit,
 )
 
@@ -55,10 +57,52 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     var confirmReset by remember { mutableStateOf(false) }
     val version = remember { vm.appRepository.versionName() }
 
+    val update by vm.updateState.collectAsStateWithLifecycle()
+
     fun system(action: String, label: String) =
         vm.appRepository.openSystemScreen(context, action, label)
 
+    val installed = "version installée : $version"
+    val updateEntry = when (val u = update) {
+        UpdateState.Idle -> Entry(
+            "update", "Rechercher une mise à jour", subtitle = installed.replaceFirstChar { it.uppercase() },
+            onClick = { vm.checkForUpdate() },
+        )
+        UpdateState.Checking -> Entry(
+            "update", "Recherche d'une mise à jour…", subtitle = installed.replaceFirstChar { it.uppercase() },
+            onClick = {},
+        )
+        UpdateState.UpToDate -> Entry(
+            "update", "Rechercher une mise à jour", subtitle = "Tu as la dernière version ($version)",
+            onClick = { vm.checkForUpdate() },
+        )
+        is UpdateState.Available -> Entry(
+            "update", "Installer la version ${u.info.versionName}",
+            subtitle = "Nouvelle version disponible · $installed",
+            highlighted = true,
+            onClick = { vm.installUpdate(context) },
+        )
+        is UpdateState.Downloading -> Entry(
+            "update", "Téléchargement… ${(u.progress * 100).toInt()} %",
+            subtitle = "Version ${u.info.versionName}",
+            highlighted = true,
+            onClick = {},
+        )
+        UpdateState.Installing -> Entry(
+            "update", "Installation…", subtitle = "Le launcher va redémarrer tout seul",
+            highlighted = true,
+            onClick = {},
+        )
+        is UpdateState.Error -> Entry(
+            "update",
+            if (u.info != null) "Réessayer l'installation" else "Rechercher une mise à jour",
+            subtitle = u.message,
+            onClick = { if (u.info != null) vm.installUpdate(context) else vm.checkForUpdate() },
+        )
+    }
+
     val sections: List<Pair<String, List<Entry>>> = listOf(
+        "Mise à jour" to listOf(updateEntry),
         "Accueil" to listOf(
             Entry(
                 key = "home_apps",
@@ -158,6 +202,11 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
         )
     }
 
+    // À l'ouverture, on vérifie les mises à jour si ce n'est pas déjà fait.
+    LaunchedEffect(Unit) {
+        if (vm.updateState.value == UpdateState.Idle) vm.checkForUpdate()
+    }
+
     LaunchedEffect(Unit) {
         val wanted = vm.settingsFocusKey ?: firstKey
         // Index dans la liste (en-têtes de section compris) pour faire défiler jusqu'à l'entrée.
@@ -185,6 +234,7 @@ private fun LazyListScope.section(
                 subtitle = entry.subtitle,
                 value = entry.value,
                 chevron = entry.chevron,
+                highlighted = entry.highlighted,
                 onClick = entry.onClick,
                 modifier = Modifier
                     .focusRequester(registry.requester(entry.key))

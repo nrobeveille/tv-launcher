@@ -2,7 +2,9 @@ package fr.nrobeveille.tvlauncher.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,6 +47,8 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import fr.nrobeveille.tvlauncher.LauncherViewModel
+import fr.nrobeveille.tvlauncher.UpdateState
+import fr.nrobeveille.tvlauncher.ui.theme.Accent
 import fr.nrobeveille.tvlauncher.data.AppInfo
 import fr.nrobeveille.tvlauncher.data.LauncherSettings
 import fr.nrobeveille.tvlauncher.ui.components.ActionMenu
@@ -72,6 +76,7 @@ fun HomeScreen(
 ) {
     val favorites by vm.favoriteApps.collectAsStateWithLifecycle()
     val focusSignal by vm.homeFocusSignal.collectAsStateWithLifecycle()
+    val updateState by vm.updateState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val registry = remember { FocusRegistry() }
@@ -98,12 +103,23 @@ fun HomeScreen(
             verticalAlignment = Alignment.Top,
         ) {
             Clock(use24h = settings.use24h)
-            SettingsButton(
-                onClick = onOpenSettings,
-                modifier = Modifier
-                    .focusRequester(registry.requester(KEY_SETTINGS))
-                    .onFocusChanged { if (it.isFocused) vm.homeFocusKey = KEY_SETTINGS },
-            )
+            Box {
+                SettingsButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier
+                        .focusRequester(registry.requester(KEY_SETTINGS))
+                        .onFocusChanged { if (it.isFocused) vm.homeFocusKey = KEY_SETTINGS },
+                )
+                // Pastille : une mise à jour est disponible.
+                if (updateState is UpdateState.Available) {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .size(14.dp)
+                            .background(Accent, CircleShape)
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.weight(1f))
