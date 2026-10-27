@@ -33,17 +33,17 @@ fun LauncherTheme(content: @Composable () -> Unit) {
 
 /** Dégradé de fond correspondant au réglage choisi. */
 fun BackgroundStyle.brush(): Brush {
-    fun diagonal(vararg colors: Color) = Brush.linearGradient(
-        colors = colors.toList(),
+    fun diagonal(colors: List<Color>) = Brush.linearGradient(
+        colors = colors,
         start = Offset.Zero,
         end = Offset.Infinite,
     )
     return when (this) {
-        BackgroundStyle.NUIT -> diagonal(Color(0xFF0B1020), Color(0xFF1B2347))
-        BackgroundStyle.OCEAN -> diagonal(Color(0xFF02131F), Color(0xFF0A3D52))
-        BackgroundStyle.AURORE -> diagonal(Color(0xFF160C2B), Color(0xFF3A1D52), Color(0xFF0E3A45))
-        BackgroundStyle.FORET -> diagonal(Color(0xFF07140F), Color(0xFF173A2C))
-        BackgroundStyle.GRAPHITE -> diagonal(Color(0xFF111111), Color(0xFF2A2A2A))
+        BackgroundStyle.NUIT -> diagonal(listOf(Color(0xFF0B1020), Color(0xFF1B2347)))
+        BackgroundStyle.OCEAN -> diagonal(listOf(Color(0xFF02131F), Color(0xFF0A3D52)))
+        BackgroundStyle.AURORE -> diagonal(listOf(Color(0xFF160C2B), Color(0xFF3A1D52), Color(0xFF0E3A45)))
+        BackgroundStyle.FORET -> diagonal(listOf(Color(0xFF07140F), Color(0xFF173A2C)))
+        BackgroundStyle.GRAPHITE -> diagonal(listOf(Color(0xFF111111), Color(0xFF2A2A2A)))
         BackgroundStyle.NOIR -> Brush.linearGradient(listOf(Color.Black, Color.Black))
     }
 }
