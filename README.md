@@ -77,23 +77,21 @@ adb shell cmd role add-role-holder --user 0 android.app.role.HOME fr.nrobeveille
 adb shell cmd role get-role-holders --user 0 android.app.role.HOME
 ```
 
-Si l'accueil Google TV s'ouvre encore, désactive-le **après** la commande ci-dessus
-(dans l'autre ordre, le stick se bloque en appuyant sur Home) :
+Ton launcher s'ouvre alors avec le bouton Home.
 
-```
-adb shell pm disable-user --user 0 com.google.android.apps.tv.launcherx
-```
+**Ne désactive pas l'accueil Google TV** (`com.google.android.apps.tv.launcherx`) : sur le
+Xiaomi TV Stick 4K (2e gén.), le stick gèle dès qu'on appuie sur Home s'il est désactivé.
+Il reste installé mais ne s'affiche plus. Si tu l'as désactivé et que tout est figé :
+`adb shell pm enable com.google.android.apps.tv.launcherx`.
 
 ### Revenir en arrière
 
 ```
-adb shell pm enable com.google.android.apps.tv.launcherx
 adb shell cmd role add-role-holder --user 0 android.app.role.HOME com.google.android.apps.tv.launcherx
 ```
 
-Garde le débogage activé pendant la période d'essai : c'est ce qui te permet de revenir
-en arrière à tout moment depuis le PC. **Avant de désinstaller le launcher, réactive
-toujours l'accueil Google**, sinon le stick n'a plus d'écran d'accueil.
+Garde le débogage activé : c'est ce qui te permet de revenir en arrière à tout moment
+depuis le PC.
 
 ---
 
