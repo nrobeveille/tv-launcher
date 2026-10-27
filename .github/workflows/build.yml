@@ -30,8 +30,19 @@ jobs:
       - name: Compiler l'APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace
+          set -o pipefail
+          ./gradlew assembleRelease 2>&1 | tee build.log
           cp app/build/outputs/apk/release/app-release.apk tv-launcher.apk
+
+      - name: Résumer les erreurs de compilation
+        if: failure()
+        run: |
+          # Regroupe les erreurs dans une annotation (lisible sans télécharger les logs).
+          ERRORS=$(grep -E "^e: |What went wrong|^> |Could not|error:|Unresolved|FAILED" build.log | head -n 60 || true)
+          ERRORS="${ERRORS//'%'/'%25'}"
+          ERRORS="${ERRORS//$'\r'/'%0D'}"
+          ERRORS="${ERRORS//$'\n'/'%0A'}"
+          echo "::error title=Erreurs de compilation::${ERRORS:-Aucune ligne d'erreur reconnue}"
 
       - name: Garder l'APK comme artefact
         uses: actions/upload-artifact@v4
