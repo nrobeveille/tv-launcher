@@ -15,6 +15,8 @@ service en arrière-plan : juste tes applis.
   - Fond d'écran, taille des tuiles, affichage du nom des applis, format de l'heure
   - Raccourcis vers les paramètres de la TV, le Wi-Fi et les options développeur
   - Réinitialiser l'accueil
+  - **Mise à jour** : vérifie la dernière release GitHub, télécharge et installe la
+    nouvelle version. Une pastille bleue sur la roue dentée signale une mise à jour.
 
 Stack : Kotlin, Jetpack Compose + Compose for TV (`androidx.tv:tv-material`), DataStore.
 
@@ -22,8 +24,9 @@ Stack : Kotlin, Jetpack Compose + Compose for TV (`androidx.tv:tv-material`), Da
 
 ## Récupérer l'APK
 
-Chaque push sur `main` est compilé par GitHub Actions. L'APK est publié dans la release
-**« latest »** du dépôt (onglet *Releases* → `tv-launcher.apk`).
+Chaque push sur `main` est compilé par GitHub Actions et publié comme release
+`v1.0.N` (N = numéro du build), avec l'APK `tv-launcher.apk`. Les 5 dernières versions
+sont conservées. Les autres branches sont compilées mais pas publiées.
 
 Pour compiler toi-même : ouvre le dossier dans Android Studio, ou lance
 `./gradlew assembleRelease` (l'APK sort dans `app/build/outputs/apk/release/`).
@@ -55,30 +58,84 @@ adb shell am start -n fr.nrobeveille.tvlauncher/.MainActivity
 « Launcher TV » apparaît aussi dans la liste des applis du stick. **Teste-le d'abord**
 avant d'en faire ton accueil.
 
-### 3. En faire l'écran d'accueil
+### 3. Autoriser les mises à jour
 
-Google TV n'affiche pas de choix d'écran d'accueil : il faut désactiver le sien.
+Le launcher doit avoir le droit d'installer des applis pour se mettre à jour lui-même :
+
+```
+adb shell appops set fr.nrobeveille.tvlauncher REQUEST_INSTALL_PACKAGES allow
+```
+
+(Sinon, à la première mise à jour, il ouvre l'écran système où l'autoriser.)
+
+### 4. En faire l'écran d'accueil
+
+Déclare-le comme appli d'accueil par défaut, puis appuie sur Home :
+
+```
+adb shell cmd role add-role-holder --user 0 android.app.role.HOME fr.nrobeveille.tvlauncher
+adb shell cmd role get-role-holders --user 0 android.app.role.HOME
+```
+
+Si l'accueil Google TV s'ouvre encore, désactive-le **après** la commande ci-dessus
+(dans l'autre ordre, le stick se bloque en appuyant sur Home) :
 
 ```
 adb shell pm disable-user --user 0 com.google.android.apps.tv.launcherx
-```
-
-Appuie sur Home : c'est Launcher TV qui s'ouvre. Si l'accueil Google ou un écran de
-configuration revient malgré tout, désactive aussi l'accueil de secours :
-
-```
-adb shell pm disable-user --user 0 com.google.android.tungsten.setupwraith
 ```
 
 ### Revenir en arrière
 
 ```
 adb shell pm enable com.google.android.apps.tv.launcherx
-adb shell pm enable com.google.android.tungsten.setupwraith
+adb shell cmd role add-role-holder --user 0 android.app.role.HOME com.google.android.apps.tv.launcherx
 ```
 
 Garde le débogage activé pendant la période d'essai : c'est ce qui te permet de revenir
-en arrière à tout moment depuis le PC.
+en arrière à tout moment depuis le PC. **Avant de désinstaller le launcher, réactive
+toujours l'accueil Google**, sinon le stick n'a plus d'écran d'accueil.
+
+---
+
+## Mises à jour
+
+Dans **Paramètres → Mise à jour**, le launcher interroge l'API GitHub
+(`/repos/nrobeveille/tv-launcher/releases/latest`). Si le numéro de la release est plus
+grand que celui de la version installée, il télécharge l'APK, vérifie qu'il s'agit bien
+du launcher, puis l'installe. L'appli redémarre toute seule. Il vérifie aussi en silence
+au démarrage (au plus toutes les 6 h) pour afficher la pastille.
+
+Le dépôt doit être **public** pour que le launcher lise les releases sans jeton. Pour un
+dépôt privé, crée un jeton GitHub en lecture seule et ajoute-le en secret `UPDATE_TOKEN` :
+il sera intégré à l'APK.
+
+### Clé de signature
+
+Une mise à jour n'est acceptée par Android que si elle est signée avec la même clé que
+la version installée. Les builds de `main` sont signés avec la clé fournie par deux
+secrets du dépôt (*Settings → Secrets and variables → Actions*) :
+
+- `SIGNING_KEYSTORE_BASE64` : le fichier `.jks` encodé en base64 ;
+- `SIGNING_PASSWORD` : son mot de passe (alias de la clé : `tvlauncher`).
+
+Sans ces secrets, la publication échoue volontairement. **Garde une copie de la clé** :
+si elle est perdue, il faudra désinstaller puis réinstaller le launcher une fois.
+
+### Passer d'une ancienne version à une version signée
+
+Les premières versions (avant le système de mise à jour) étaient signées avec une clé
+temporaire. Pour passer à la version signée, une réinstallation est nécessaire une seule
+fois :
+
+```
+adb shell pm enable com.google.android.apps.tv.launcherx
+adb uninstall fr.nrobeveille.tvlauncher
+adb install tv-launcher.apk
+adb shell appops set fr.nrobeveille.tvlauncher REQUEST_INSTALL_PACKAGES allow
+adb shell cmd role add-role-holder --user 0 android.app.role.HOME fr.nrobeveille.tvlauncher
+```
+
+Les mises à jour suivantes se font depuis les Paramètres.
 
 ---
 
@@ -93,8 +150,9 @@ adb shell dumpsys meminfo fr.nrobeveille.tvlauncher | grep -E "TOTAL PSS|TOTAL R
 ```
 app/src/main/java/fr/nrobeveille/tvlauncher/
 ├── MainActivity.kt          activité Home, réception des installations/désinstallations
-├── LauncherViewModel.kt     état, navigation, actions
+├── LauncherViewModel.kt     état, navigation, actions, mise à jour
 ├── data/                    liste des applis, bannières (cache), réglages (DataStore)
+├── update/                  recherche, téléchargement et installation des mises à jour
 └── ui/
     ├── home/                accueil
     ├── allapps/             toutes les applis
@@ -102,8 +160,3 @@ app/src/main/java/fr/nrobeveille/tvlauncher/
     ├── components/          tuiles, menu contextuel, gestion du focus
     └── theme/               couleurs et fonds
 ```
-
-Note : l'APK de release est signé avec la clé de debug, pour pouvoir l'installer
-directement. Un APK compilé sur ta machine et un autre compilé par GitHub n'ont pas la
-même clé : pour passer de l'un à l'autre, désinstalle d'abord (`adb uninstall
-fr.nrobeveille.tvlauncher`).
