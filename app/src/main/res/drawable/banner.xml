@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bannière 16:9 affichée dans la liste des applis Google TV -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#FF0B1020"
+        android:pathData="M0,0h320v180h-320z" />
+    <path
+        android:fillColor="#FF2B3A67"
+        android:pathData="M0,120 C80,90 160,150 320,100 L320,180 L0,180 Z" />
+    <!-- Grille 2x2 stylisée -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M120,50h34v34h-34z M166,50h34v34h-34z M120,96h34v34h-34z" />
+    <path
+        android:fillColor="#FF7FB2FF"
+        android:pathData="M166,96h34v34h-34z" />
+</vector>
