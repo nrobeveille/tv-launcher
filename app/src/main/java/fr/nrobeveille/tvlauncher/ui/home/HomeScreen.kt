@@ -48,6 +48,10 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import fr.nrobeveille.tvlauncher.LauncherViewModel
 import fr.nrobeveille.tvlauncher.UpdateState
+import fr.nrobeveille.tvlauncher.data.Weather
+import fr.nrobeveille.tvlauncher.data.WeatherRepository
+import fr.nrobeveille.tvlauncher.ui.components.WeatherIcon
+import androidx.compose.foundation.layout.width
 import fr.nrobeveille.tvlauncher.ui.theme.Accent
 import fr.nrobeveille.tvlauncher.data.AppInfo
 import fr.nrobeveille.tvlauncher.data.LauncherSettings
@@ -77,6 +81,7 @@ fun HomeScreen(
     val favorites by vm.favoriteApps.collectAsStateWithLifecycle()
     val focusSignal by vm.homeFocusSignal.collectAsStateWithLifecycle()
     val updateState by vm.updateState.collectAsStateWithLifecycle()
+    val weather by vm.weather.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val registry = remember { FocusRegistry() }
@@ -102,7 +107,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top,
         ) {
-            Clock(use24h = settings.use24h)
+            Clock(use24h = settings.use24h, weather = weather)
             Box {
                 SettingsButton(
                     onClick = onOpenSettings,
@@ -227,6 +232,14 @@ fun HomeScreen(
         if (!registry.request(target)) registry.request(rowKeys.first())
     }
 
+    // Météo : nouvelle tentative toutes les 5 min (le ViewModel limite à 30 min après un succès).
+    LaunchedEffect(Unit) {
+        while (true) {
+            vm.refreshWeather()
+            delay(5 * 60_000L)
+        }
+    }
+
     // Après le retrait d'une appli.
     LaunchedEffect(apps, pendingFocus) {
         val key = pendingFocus ?: return@LaunchedEffect
@@ -254,7 +267,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Clock(use24h: Boolean) {
+private fun Clock(use24h: Boolean, weather: Weather?) {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -268,8 +281,25 @@ private fun Clock(use24h: Boolean) {
         .replaceFirstChar { it.titlecase(locale) }
 
     Column {
-        Text(text = time, fontSize = 56.sp, fontWeight = FontWeight.Light)
-        Text(text = date, fontSize = 18.sp, color = SubtleText)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = time, fontSize = 56.sp, fontWeight = FontWeight.Light)
+            if (weather != null) {
+                Spacer(Modifier.width(32.dp))
+                WeatherIcon(
+                    kind = weather.kind,
+                    isDay = weather.isDay,
+                    description = "${weather.description} à ${WeatherRepository.CITY}",
+                    modifier = Modifier.size(46.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(text = "${weather.temperature}°", fontSize = 36.sp, fontWeight = FontWeight.Light)
+            }
+        }
+        Text(
+            text = if (weather != null) "$date · ${WeatherRepository.CITY}" else date,
+            fontSize = 18.sp,
+            color = SubtleText,
+        )
     }
 }
 

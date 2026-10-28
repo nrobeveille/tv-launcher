@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         vm.refreshApps()
+        vm.refreshWeather()
         vm.checkForUpdate(silent = true) // au plus une fois toutes les 6 h
     }
 

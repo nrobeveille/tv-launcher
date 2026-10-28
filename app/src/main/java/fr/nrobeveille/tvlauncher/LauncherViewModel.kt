@@ -8,6 +8,8 @@ import fr.nrobeveille.tvlauncher.data.AppInfo
 import fr.nrobeveille.tvlauncher.data.AppRepository
 import fr.nrobeveille.tvlauncher.data.LauncherSettings
 import fr.nrobeveille.tvlauncher.data.SettingsRepository
+import fr.nrobeveille.tvlauncher.data.Weather
+import fr.nrobeveille.tvlauncher.data.WeatherRepository
 import fr.nrobeveille.tvlauncher.update.UpdateEvents
 import fr.nrobeveille.tvlauncher.update.UpdateException
 import fr.nrobeveille.tvlauncher.update.UpdateInfo
@@ -197,6 +199,27 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             val defaults = defaultFavorites(apps)
             _favorites.value = defaults
             settingsRepository.setFavorites(defaults)
+        }
+    }
+
+    // --- Météo --------------------------------------------------------------
+
+    private val weatherRepository = WeatherRepository()
+
+    private val _weather = MutableStateFlow<Weather?>(null)
+    val weather: StateFlow<Weather?> = _weather.asStateFlow()
+
+    private var weatherJob: Job? = null
+    private var lastWeatherFetch = 0L
+
+    /** Rafraîchit la météo, au plus toutes les 30 min tant que la dernière requête a réussi. */
+    fun refreshWeather() {
+        if (weatherJob?.isActive == true) return
+        if (System.currentTimeMillis() - lastWeatherFetch < 30 * 60_000L) return
+        weatherJob = viewModelScope.launch {
+            val result = runCatching { weatherRepository.fetch() }.getOrNull() ?: return@launch
+            _weather.value = result
+            lastWeatherFetch = System.currentTimeMillis()
         }
     }
 
