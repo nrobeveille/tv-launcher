@@ -1,6 +1,10 @@
 package fr.nrobeveille.tvlauncher.ui.settings
 
+import android.os.SystemClock
 import android.provider.Settings
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import fr.nrobeveille.tvlauncher.ui.components.EasterEggOverlay
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +59,9 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     val registry = remember { FocusRegistry() }
     val listState = rememberLazyListState()
     var confirmReset by remember { mutableStateOf(false) }
+    var versionTaps by remember { mutableIntStateOf(0) }
+    var lastVersionTap by remember { mutableLongStateOf(0L) }
+    var showEasterEgg by remember { mutableStateOf(false) }
     val version = remember { vm.appRepository.versionName() }
 
     val update by vm.updateState.collectAsStateWithLifecycle()
@@ -161,7 +168,16 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
                 subtitle = "Remet les applis et l'apparence par défaut",
                 onClick = { confirmReset = true },
             ),
-            Entry("about", "Version", value = version, onClick = {}),
+            Entry("about", "Version", value = version, onClick = {
+                // 5 appuis d'affilée (moins de 1,5 s entre deux) : surprise.
+                val now = SystemClock.uptimeMillis()
+                versionTaps = if (now - lastVersionTap < 1_500L) versionTaps + 1 else 1
+                lastVersionTap = now
+                if (versionTaps >= 5) {
+                    versionTaps = 0
+                    showEasterEgg = true
+                }
+            }),
         ),
     )
     val firstKey = sections.first().second.first().key
@@ -188,6 +204,10 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
                 sections.forEach { (title, entries) -> section(title, entries, registry, vm) }
             }
         }
+    }
+
+    if (showEasterEgg) {
+        EasterEggOverlay(onDone = { showEasterEgg = false })
     }
 
     if (confirmReset) {
