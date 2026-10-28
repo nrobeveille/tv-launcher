@@ -5,6 +5,11 @@ import android.provider.Settings
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import fr.nrobeveille.tvlauncher.ui.components.EasterEggOverlay
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +67,8 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     var versionTaps by remember { mutableIntStateOf(0) }
     var lastVersionTap by remember { mutableLongStateOf(0L) }
     var showEasterEgg by remember { mutableStateOf(false) }
+    val shake = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
     val version = remember { vm.appRepository.versionName() }
 
     val update by vm.updateState.collectAsStateWithLifecycle()
@@ -182,7 +189,15 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     )
     val firstKey = sections.first().second.first().key
 
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                translationX = shake.value
+                rotationZ = shake.value * 0.02f
+            },
+        contentAlignment = Alignment.TopCenter,
+    ) {
         Column(
             modifier = Modifier
                 .widthIn(max = 760.dp)
@@ -207,7 +222,25 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     }
 
     if (showEasterEgg) {
-        EasterEggOverlay(onDone = { showEasterEgg = false })
+        EasterEggOverlay(
+            onImpact = {
+                // La page tremble sous le choc.
+                scope.launch {
+                    shake.animateTo(
+                        targetValue = 0f,
+                        animationSpec = keyframes {
+                            durationMillis = 450
+                            42f at 50
+                            -36f at 110
+                            26f at 180
+                            -16f at 250
+                            8f at 330
+                        },
+                    )
+                }
+            },
+            onDone = { showEasterEgg = false },
+        )
     }
 
     if (confirmReset) {
