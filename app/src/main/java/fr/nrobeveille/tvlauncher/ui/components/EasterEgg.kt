@@ -71,7 +71,7 @@ private val SparkColors = listOf(Color(0xFFFFC94D), Color(0xFF7FB2FF), Color.Whi
 
 /**
  * Surprise : un polaroïd suspendu à un fil tombe du plafond comme au bout d'un élastique,
- * percute (« BOING ! », étincelles, son), se balance, puis est remonté d'un coup sec.
+ * percute (texte BD, étincelles, son), se balance, puis est remonté d'un coup sec.
  * Le fond reste visible autour. [onImpact] est appelé au moment de l'impact
  * (pour faire trembler l'écran derrière). Retour ferme plus tôt.
  */
@@ -188,7 +188,7 @@ fun EasterEggOverlay(onImpact: () -> Unit, onDone: () -> Unit) {
                     }
                     .shadow(18.dp, RoundedCornerShape(6.dp))
                     .background(PolaroidColor, RoundedCornerShape(6.dp))
-                    .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 6.dp),
+                    .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 28.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.easter_egg),
@@ -197,13 +197,6 @@ fun EasterEggOverlay(onImpact: () -> Unit, onDone: () -> Unit) {
                     modifier = Modifier
                         .size(width = photoWidth, height = photoHeight)
                         .clip(RoundedCornerShape(3.dp)),
-                )
-                Text(
-                    text = "Surprise !",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2A2A2A),
-                    modifier = Modifier.padding(top = 6.dp),
                 )
             }
 
@@ -226,9 +219,9 @@ fun EasterEggOverlay(onImpact: () -> Unit, onDone: () -> Unit) {
                 }
             }
 
-            // « BOING ! » façon bande dessinée.
+            // Texte façon bande dessinée.
             Text(
-                text = "BOING !",
+                text = "GAY",
                 fontSize = 42.sp,
                 fontWeight = FontWeight.Black,
                 color = BoingColor,
