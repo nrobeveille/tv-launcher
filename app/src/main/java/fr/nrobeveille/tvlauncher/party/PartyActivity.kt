@@ -10,10 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import fr.nrobeveille.tvlauncher.lights.WizPartySync
 import fr.nrobeveille.tvlauncher.ui.theme.LauncherTheme
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -28,6 +30,8 @@ data class MicTestUi(val lines: List<String>, val status: String, val running: B
 class PartyActivity : ComponentActivity() {
 
     private val engine by lazy { PartyAudioEngine(applicationContext) }
+    private val wizSync by lazy { WizPartySync(applicationContext) }
+    private var wizCount by mutableIntStateOf(0)
     private val prefs by lazy { getSharedPreferences("party", MODE_PRIVATE) }
 
     private var source by mutableStateOf(PartySource.MIC)
@@ -77,6 +81,8 @@ class PartyActivity : ComponentActivity() {
                         effect = PartyEffect.entries[(effect.ordinal + delta).mod(PartyEffect.entries.size)]
                         prefs.edit().putString("effect", effect.name).apply()
                     },
+                    wizCount = wizCount,
+                    onBeat = { rgb -> wizSync.onBeat(rgb) },
                     onStartMicTest = { startMicTest() },
                     onCloseMicTest = {
                         micTestJob?.cancel()
@@ -90,6 +96,8 @@ class PartyActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        wizSync.start()
+        wizCount = wizSync.activeCount
         startEngine()
     }
 
@@ -97,6 +105,7 @@ class PartyActivity : ComponentActivity() {
         micTestJob?.cancel()
         micTest = null
         engine.stop()
+        wizSync.stop() // remet les ampoules comme avant
         super.onStop()
     }
 

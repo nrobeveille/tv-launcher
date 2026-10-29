@@ -15,6 +15,7 @@ service en arrière-plan : juste tes applis.
 - **Mode soirée** : appli à part (« Mode soirée » dans *Toutes les applis*, épinglable sur
   l'accueil). L'écran s'illumine au rythme de la musique, couleurs concentrées sur les
   bords pour être reprises par un boîtier LED HDMI. Voir plus bas.
+- **Lumières** : appli à part pour piloter les ampoules WiZ du réseau local (voir plus bas).
 - **Paramètres** (roue dentée en haut à droite) :
   - Applis de l'accueil (cases à cocher) et Réorganiser
   - Fond d'écran, taille des tuiles, affichage du nom des applis, format de l'heure
@@ -125,6 +126,21 @@ La première fois, autorise l'accès au micro (demandé à l'écran). Si une sou
 rien pendant quelques secondes, un message propose d'en essayer une autre. Les éclairs
 sont limités à 2,5 par seconde.
 
+## Lumières (ampoules WiZ)
+
+Ouvre « Lumières » (ou épingle-le sur l'accueil depuis *Toutes les applis*). Les ampoules
+sont trouvées automatiquement sur le Wi-Fi (protocole local WiZ en UDP, port 38899, sans
+compte ni cloud) : le stick et les ampoules doivent être sur le même réseau.
+
+- À gauche : **Toutes les ampoules** puis chaque ampoule. OK allume / éteint.
+- À droite : allumage, luminosité, blancs (chaud, neutre, froid), couleurs, ambiances WiZ,
+  et pour une ampoule : faire clignoter (pour la repérer), choisir un nom, l'oublier.
+- **Suivre le Mode soirée** : les ampoules prennent la couleur de l'écran à chaque temps
+  fort (4 fois par seconde au plus), puis reviennent à leur état d'avant en quittant.
+
+Les noms viennent de l'appli WiZ côté cloud et ne sont pas lisibles en local : on les
+choisit ici (« Faire clignoter » aide à savoir laquelle est laquelle).
+
 ## Mises à jour
 
 Dans **Paramètres → Mise à jour**, le launcher interroge l'API GitHub
@@ -182,6 +198,7 @@ app/src/main/java/fr/nrobeveille/tvlauncher/
 ├── data/                    liste des applis, bannières (cache), réglages (DataStore)
 ├── update/                  recherche, téléchargement et installation des mises à jour
 ├── party/                   Mode soirée : analyse du son, effets lumineux
+├── lights/                  Lumières : ampoules WiZ (UDP local)
 └── ui/
     ├── home/                accueil
     ├── allapps/             toutes les applis

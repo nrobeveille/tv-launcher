@@ -81,6 +81,23 @@
             </intent-filter>
         </activity>
 
+        <!-- Lumières : pilotage des ampoules WiZ -->
+        <activity
+            android:name=".lights.LightsActivity"
+            android:banner="@drawable/lights_banner"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|density|fontScale"
+            android:exported="true"
+            android:label="@string/lights_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:taskAffinity="fr.nrobeveille.tvlauncher.lights"
+            android:theme="@style/Theme.TvLauncher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- Résultat de l'installation d'une mise à jour -->
         <receiver
             android:name=".update.InstallResultReceiver"

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bannière 16:9 de « Lumières » : ampoule allumée sur fond sombre -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#FF0E1424"
+        android:pathData="M0,0h320v180h-320z" />
+    <!-- Halo -->
+    <path
+        android:fillColor="#26FFC94D"
+        android:pathData="M160,74m-62,0a62,62 0,1 1,124 0a62,62 0,1 1,-124 0" />
+    <path
+        android:fillColor="#40FFC94D"
+        android:pathData="M160,74m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0" />
+    <!-- Globe -->
+    <path
+        android:fillColor="#FFFFD27A"
+        android:pathData="M160,44c-17,0 -30,13 -30,30c0,11 6,19 12,25c3,3 5,7 5,11v6h26v-6c0,-4 2,-8 5,-11c6,-6 12,-14 12,-25c0,-17 -13,-30 -30,-30z" />
+    <!-- Culot -->
+    <path
+        android:fillColor="#FFB8C0D0"
+        android:pathData="M147,120h26v6h-26z M149,129h22v5h-22z M153,137h14v5h-14z" />
+    <!-- Rayons -->
+    <path
+        android:fillColor="#FFFFD27A"
+        android:pathData="M158,18h4v14h-4z M108,72h14v4h-14z M198,72h14v4h-14z" />
+</vector>

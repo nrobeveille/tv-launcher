@@ -43,12 +43,18 @@ class AppRepository(context: Context) {
             for (ri in activities) {
                 val info = ri.activityInfo ?: continue
                 val pkg = info.packageName
-                if (result.containsKey(pkg)) continue
-                // Le launcher lui-même n'apparaît pas, mais son Mode soirée oui.
-                if (pkg == appContext.packageName && info.name.endsWith(".MainActivity")) continue
+                // Nos propres applis (Mode soirée, Lumières) ont chacune leur identifiant ;
+                // le launcher lui-même n'apparaît pas.
+                val id = if (pkg == appContext.packageName) {
+                    if (info.name.endsWith(".MainActivity")) continue
+                    ownAppId(info.name)
+                } else {
+                    pkg
+                }
+                if (result.containsKey(id)) continue
                 val label = ri.loadLabel(pm)?.toString()?.trim().orEmpty().ifEmpty { pkg }
-                result[pkg] = AppInfo(
-                    packageName = pkg,
+                result[id] = AppInfo(
+                    packageName = id,
                     label = label,
                     component = android.content.ComponentName(pkg, info.name),
                     isTvApp = isTv,
@@ -107,7 +113,7 @@ class AppRepository(context: Context) {
     }
 
     fun launch(context: Context, app: AppInfo) {
-        val intent = if (app.packageName == appContext.packageName) {
+        val intent = if (app.component.packageName == appContext.packageName) {
             // Nos propres activités (Mode soirée) : on vise l'activité exacte.
             Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
@@ -125,9 +131,10 @@ class AppRepository(context: Context) {
     }
 
     fun openAppDetails(context: Context, packageName: String) {
+        val realPackage = if (packageName.startsWith(appContext.packageName)) appContext.packageName else packageName
         val intent = Intent(
             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.fromParts("package", packageName, null)
+            Uri.fromParts("package", realPackage, null)
         ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startSafely(context, intent, "les infos de l'appli")
     }
@@ -135,6 +142,10 @@ class AppRepository(context: Context) {
     fun openSystemScreen(context: Context, action: String, label: String) {
         startSafely(context, Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), label)
     }
+
+    /** Identifiant d'une de nos activités : PartyActivity → « <paquet>.party ». */
+    fun ownAppId(activityName: String): String =
+        appContext.packageName + "." + activityName.substringAfterLast('.').removeSuffix("Activity").lowercase()
 
     fun versionName(): String = runCatching {
         pm.getPackageInfo(appContext.packageName, 0).versionName

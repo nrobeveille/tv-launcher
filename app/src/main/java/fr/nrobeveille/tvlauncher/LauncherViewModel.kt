@@ -115,7 +115,8 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             val apps = appRepository.loadApps()
             _apps.value = apps
             if (stored.initialized) {
-                _favorites.value = stored.favorites
+                val own = application.packageName
+                _favorites.value = stored.favorites.map { if (it == own) "$own.party" else it }
             } else {
                 val defaults = defaultFavorites(apps)
                 _favorites.value = defaults

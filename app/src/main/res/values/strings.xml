@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Launcher TV</string>
     <string name="party_name">Mode soirée</string>
+    <string name="lights_name">Lumières</string>
 </resources>

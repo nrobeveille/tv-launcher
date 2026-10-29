@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -94,6 +95,8 @@ fun PartyScreen(
     message: String?,
     micTest: MicTestUi?,
     micTestLevel: Float,
+    wizCount: Int,
+    onBeat: (Int) -> Unit,
     onChangeSource: (Int) -> Unit,
     onChangeEffect: (Int) -> Unit,
     onStartMicTest: () -> Unit,
@@ -106,6 +109,10 @@ fun PartyScreen(
     var noSound by remember { mutableStateOf(false) }
     var activeSource by remember { mutableStateOf(engine.activeSource) }
     var shownBpm by remember { mutableIntStateOf(engine.bpm.roundToInt()) }
+
+    // La boucle tourne en continu : elle doit toujours lire l'effet et le callback à jour.
+    val currentEffect by rememberUpdatedState(effect)
+    val currentOnBeat by rememberUpdatedState(onBeat)
 
     // Boucle d'animation : lit le moteur audio et fait évoluer les couleurs.
     LaunchedEffect(Unit) {
@@ -122,6 +129,9 @@ fun PartyScreen(
             if (beats != lastBeats) {
                 lastBeats = beats
                 visual.onBeat()
+                // Couleur du temps fort, envoyée aux ampoules WiZ si la synchro est active.
+                val hue = if (currentEffect == PartyEffect.FLASH) visual.beatHue else visual.hue
+                currentOnBeat(android.graphics.Color.HSVToColor(floatArrayOf(hue, 1f, 1f)))
             }
             visual.update(dt, engine.level)
 
@@ -214,6 +224,9 @@ fun PartyScreen(
                 Text(message, fontSize = 15.sp, color = WarningColor)
             } else if (noSound) {
                 Text("Aucun son capté : ◀ ▶ pour essayer une autre source", fontSize = 15.sp, color = WarningColor)
+            }
+            if (wizCount > 0) {
+                Text("Ampoules WiZ synchronisées : $wizCount", fontSize = 14.sp, color = SubtleText)
             }
             Text("Retour pour quitter", fontSize = 13.sp, color = SubtleText)
         }
