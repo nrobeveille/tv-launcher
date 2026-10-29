@@ -41,8 +41,8 @@ class ProbeResult(
             return when {
                 error != null -> "✗ ${config.label} : $error"
                 !gotData -> "✗ ${config.label} : aucune donnée reçue$via"
-                !hasSound -> "• ${config.label} : silence (${level(peak)})$via"
-                else -> "✓ ${config.label} : son capté (${level(peak)})$via"
+                !hasSound -> "• ${config.label} : silence (${MicTester.level(peak)})$via"
+                else -> "✓ ${config.label} : son capté (${MicTester.level(peak)})$via"
             }
         }
 }
@@ -250,7 +250,6 @@ class MicTester(context: Context) {
                 AudioDeviceInfo.TYPE_TV_TUNER -> "tuner TV"
                 AudioDeviceInfo.TYPE_FM_TUNER -> "tuner FM"
                 AudioDeviceInfo.TYPE_LINE_ANALOG -> "entrée ligne"
-                AudioDeviceInfo.TYPE_ECHO_REFERENCE -> "référence d'écho"
                 AudioDeviceInfo.TYPE_TELEPHONY -> "téléphonie"
                 else -> "type ${device.type}"
             }
