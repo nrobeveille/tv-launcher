@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bannière 16:9 du Mode soirée : égaliseur multicolore sur fond sombre -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#FF0B0716"
+        android:pathData="M0,0h320v180h-320z" />
+    <!-- Halo -->
+    <path
+        android:fillColor="#332B0F5C"
+        android:pathData="M160,90m-110,0a110,70 0,1 1,220 0a110,70 0,1 1,-220 0" />
+    <!-- Barres de l'égaliseur -->
+    <path android:fillColor="#FFFF4D6D" android:pathData="M70,104h16v36h-16z" />
+    <path android:fillColor="#FFFF9F43" android:pathData="M96,74h16v66h-16z" />
+    <path android:fillColor="#FFFFD93D" android:pathData="M122,48h16v92h-16z" />
+    <path android:fillColor="#FF6BCB77" android:pathData="M148,64h16v76h-16z" />
+    <path android:fillColor="#FF4D96FF" android:pathData="M174,40h16v100h-16z" />
+    <path android:fillColor="#FF9B5DE5" android:pathData="M200,70h16v70h-16z" />
+    <path android:fillColor="#FFF15BB5" android:pathData="M226,96h16v44h-16z" />
+    <!-- Sol -->
+    <path
+        android:fillColor="#55FFFFFF"
+        android:pathData="M60,146h200v3h-200z" />
+</vector>

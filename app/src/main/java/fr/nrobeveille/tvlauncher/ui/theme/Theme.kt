@@ -39,7 +39,7 @@ fun BackgroundStyle.brush(): Brush {
         end = Offset.Infinite,
     )
     return when (this) {
-        BackgroundStyle.NUIT -> diagonal(listOf(Color(0xFF0B1020), Color(0xFF1B2347)))
+        BackgroundStyle.METEO, BackgroundStyle.NUIT -> diagonal(listOf(Color(0xFF0B1020), Color(0xFF1B2347)))
         BackgroundStyle.OCEAN -> diagonal(listOf(Color(0xFF02131F), Color(0xFF0A3D52)))
         BackgroundStyle.AURORE -> diagonal(listOf(Color(0xFF160C2B), Color(0xFF3A1D52), Color(0xFF0E3A45)))
         BackgroundStyle.FORET -> diagonal(listOf(Color(0xFF07140F), Color(0xFF173A2C)))

@@ -12,6 +12,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!-- Mode soirée : écouter la musique (micro ou son joué par le stick) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
     <!-- Nécessaire depuis Android 11 pour voir les autres applis installées -->
     <queries>
         <intent>
@@ -51,6 +58,23 @@
             </intent-filter>
 
             <!-- Visible dans la liste des applis TV, pour tester avant de le mettre par défaut -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Mode soirée : appli à part dans la liste, épinglable sur l'accueil -->
+        <activity
+            android:name=".party.PartyActivity"
+            android:banner="@drawable/party_banner"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|density|fontScale"
+            android:exported="true"
+            android:label="@string/party_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:taskAffinity="fr.nrobeveille.tvlauncher.party"
+            android:theme="@style/Theme.TvLauncher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />

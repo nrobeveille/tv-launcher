@@ -43,7 +43,9 @@ class AppRepository(context: Context) {
             for (ri in activities) {
                 val info = ri.activityInfo ?: continue
                 val pkg = info.packageName
-                if (pkg == appContext.packageName || result.containsKey(pkg)) continue
+                if (result.containsKey(pkg)) continue
+                // Le launcher lui-même n'apparaît pas, mais son Mode soirée oui.
+                if (pkg == appContext.packageName && info.name.endsWith(".MainActivity")) continue
                 val label = ri.loadLabel(pm)?.toString()?.trim().orEmpty().ifEmpty { pkg }
                 result[pkg] = AppInfo(
                     packageName = pkg,
@@ -105,8 +107,15 @@ class AppRepository(context: Context) {
     }
 
     fun launch(context: Context, app: AppInfo) {
-        val intent = pm.getLeanbackLaunchIntentForPackage(app.packageName)
-            ?: pm.getLaunchIntentForPackage(app.packageName)
+        val intent = if (app.packageName == appContext.packageName) {
+            // Nos propres activités (Mode soirée) : on vise l'activité exacte.
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+                .setComponent(app.component)
+        } else {
+            pm.getLeanbackLaunchIntentForPackage(app.packageName)
+                ?: pm.getLaunchIntentForPackage(app.packageName)
+        }
         if (intent == null) {
             Toast.makeText(context, "Impossible d'ouvrir ${app.label}", Toast.LENGTH_SHORT).show()
             return

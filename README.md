@@ -10,6 +10,11 @@ service en arrière-plan : juste tes applis.
   *Infos de l'appli*. En mode déplacement : ◀ ▶ pour bouger, OK pour valider.
 - **Toutes les applis** : grille de toutes les applis installées ; appui long pour
   ajouter ou retirer de l'accueil (une pastille ✓ indique celles déjà présentes).
+- **Fond « Suit la météo »** (par défaut) : ciel de jour ou de nuit, étoiles, nuages,
+  pluie, neige, brouillard ou orage animés selon la météo d'Angers.
+- **Mode soirée** : appli à part (« Mode soirée » dans *Toutes les applis*, épinglable sur
+  l'accueil). L'écran s'illumine au rythme de la musique, couleurs concentrées sur les
+  bords pour être reprises par un boîtier LED HDMI. Voir plus bas.
 - **Paramètres** (roue dentée en haut à droite) :
   - Applis de l'accueil (cases à cocher) et Réorganiser
   - Fond d'écran, taille des tuiles, affichage du nom des applis, format de l'heure
@@ -95,6 +100,27 @@ depuis le PC.
 
 ---
 
+## Mode soirée
+
+Ouvre « Mode soirée » (ou épingle-le sur l'accueil depuis *Toutes les applis*, appui long).
+
+| Touche | Action |
+|---|---|
+| ◀ ▶ | Source du rythme : **Son du stick**, **Micro**, **Tempo manuel** |
+| ▲ ▼ | Effet : **Arc-en-ciel**, **Flash couleur**, **Pulsation** |
+| OK | En tempo manuel : appuie au rythme de la musique pour caler le tempo |
+| Retour | Quitter |
+
+- **Son du stick** : analyse le son joué par le stick lui-même (musique lancée sur la TV,
+  par exemple une appli qui continue en arrière-plan). Peut ne rien capter si le son part
+  en passthrough (Dolby) vers une barre de son.
+- **Micro** : micro du stick ou de la télécommande, s'il est utilisable en continu.
+- **Tempo manuel** : marche toujours, sans aucun son capté.
+
+La première fois, autorise l'accès au micro (demandé à l'écran). Si une source ne capte
+rien pendant quelques secondes, un message propose d'en essayer une autre. Les éclairs
+sont limités à 2,5 par seconde.
+
 ## Mises à jour
 
 Dans **Paramètres → Mise à jour**, le launcher interroge l'API GitHub
@@ -151,6 +177,7 @@ app/src/main/java/fr/nrobeveille/tvlauncher/
 ├── LauncherViewModel.kt     état, navigation, actions, mise à jour
 ├── data/                    liste des applis, bannières (cache), réglages (DataStore)
 ├── update/                  recherche, téléchargement et installation des mises à jour
+├── party/                   Mode soirée : analyse du son, effets lumineux
 └── ui/
     ├── home/                accueil
     ├── allapps/             toutes les applis

@@ -3,6 +3,7 @@ package fr.nrobeveille.tvlauncher.data
 import androidx.compose.runtime.Immutable
 
 enum class BackgroundStyle(val label: String) {
+    METEO("Suit la météo"),
     NUIT("Nuit"),
     OCEAN("Océan"),
     AURORE("Aurore"),
@@ -29,7 +30,7 @@ data class LauncherSettings(
     val favorites: List<String> = emptyList(),
     /** false tant que l'accueil n'a jamais été prérempli. */
     val initialized: Boolean = false,
-    val background: BackgroundStyle = BackgroundStyle.NUIT,
+    val background: BackgroundStyle = BackgroundStyle.METEO,
     val tileSize: TileSize = TileSize.MOYENNE,
     val labelMode: LabelMode = LabelMode.TOUJOURS,
     val use24h: Boolean = true,

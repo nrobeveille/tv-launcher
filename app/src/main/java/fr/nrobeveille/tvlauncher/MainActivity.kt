@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.nrobeveille.tvlauncher.data.BackgroundStyle
 import fr.nrobeveille.tvlauncher.ui.allapps.AllAppsScreen
 import fr.nrobeveille.tvlauncher.ui.components.LocalAppRepository
+import fr.nrobeveille.tvlauncher.ui.components.WeatherBackground
 import fr.nrobeveille.tvlauncher.ui.home.HomeScreen
 import fr.nrobeveille.tvlauncher.ui.settings.HomeAppsScreen
 import fr.nrobeveille.tvlauncher.ui.settings.ReorderScreen
@@ -82,15 +83,18 @@ class MainActivity : ComponentActivity() {
 private fun LauncherRoot(vm: LauncherViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val backStack by vm.backStack.collectAsStateWithLifecycle()
-    val background = settings?.background ?: BackgroundStyle.NUIT
+    val weather by vm.weather.collectAsStateWithLifecycle()
+    val background = settings?.background ?: BackgroundStyle.METEO
     val brush = remember(background) { background.brush() }
 
     CompositionLocalProvider(LocalAppRepository provides vm.appRepository) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush),
+                .then(if (background == BackgroundStyle.METEO) Modifier else Modifier.background(brush)),
         ) {
+            if (background == BackgroundStyle.METEO) WeatherBackground(weather)
+
             // Le bouton Retour ne ferme jamais le launcher.
             BackHandler { vm.back() }
 
