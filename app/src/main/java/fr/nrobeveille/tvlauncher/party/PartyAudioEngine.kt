@@ -1,9 +1,7 @@
 package fr.nrobeveille.tvlauncher.party
 
-import android.annotation.SuppressLint
-import android.media.AudioFormat
+import android.content.Context
 import android.media.AudioRecord
-import android.media.MediaRecorder
 import android.media.audiofx.Visualizer
 import android.os.SystemClock
 import kotlin.math.exp
@@ -24,7 +22,12 @@ enum class PartySource(val label: String, val needsAudio: Boolean) {
  *
  * Les temps forts sont limités à 2,5 par seconde (pas de clignotement trop rapide).
  */
-class PartyAudioEngine {
+class PartyAudioEngine(context: Context) {
+
+    private val micTester = MicTester(context.applicationContext)
+
+    /** Configuration du micro choisie par le test (sinon le micro par défaut). */
+    @Volatile var micConfig: MicConfig? = null
 
     @Volatile var level: Float = 0f
         private set
@@ -181,61 +184,60 @@ class PartyAudioEngine {
 
     // --- Micro ---------------------------------------------------------------
 
-    @SuppressLint("MissingPermission") // permission vérifiée par l'activité avant le démarrage
     private fun startMicrophone(): String? {
-        val rate = 44_100
-        val minBuffer = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
-        if (minBuffer <= 0) return "Aucun micro disponible"
-        val record = try {
-            AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                rate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                max(minBuffer, 8_192),
-            )
-        } catch (e: Exception) {
-            return "Aucun micro disponible"
-        }
-        if (record.state != AudioRecord.STATE_INITIALIZED) {
-            record.release()
-            return "Aucun micro disponible"
-        }
-        try {
-            record.startRecording()
-        } catch (e: Exception) {
-            record.release()
-            return "Le micro n'a pas pu démarrer"
-        }
+        val config = micConfig ?: MicTester.DEFAULT_CONFIG
+        val (first, error) = micTester.open(config)
+        if (first == null) return "Micro indisponible ($error)"
 
         recording = true
         recordThread = Thread({
+            var record: AudioRecord = first
+            var isOpen = true
             val buffer = ShortArray(1024)
             var lowPass = 0f
-            val alpha = (2.0 * Math.PI * BASS_LIMIT_HZ / rate).toFloat()
+            val alpha = (2.0 * Math.PI * BASS_LIMIT_HZ / MicTester.SAMPLE_RATE).toFloat()
+            var lastData = SystemClock.uptimeMillis()
+            var lastSound = lastData
+            var lastReopen = lastData
             while (recording) {
-                val read = record.read(buffer, 0, buffer.size)
+                val read = record.read(buffer, 0, buffer.size, AudioRecord.READ_NON_BLOCKING)
+                val now = SystemClock.uptimeMillis()
                 if (read < 0) break
                 if (read == 0) {
+                    if (now - lastData > 500) {
+                        rawLevel = 0f
+                        level = 0f
+                    }
                     Thread.sleep(10)
-                    continue
+                } else {
+                    lastData = now
+                    var sum = 0.0
+                    var bassSum = 0.0
+                    for (i in 0 until read) {
+                        val x = buffer[i] / 32_768f
+                        lowPass += alpha * (x - lowPass)
+                        sum += x * x
+                        bassSum += lowPass * lowPass
+                    }
+                    val total = sqrt(sum / read).toFloat()
+                    if (total >= MicTester.SOUND_THRESHOLD) lastSound = now
+                    onAnalysis(bass = sqrt(bassSum / read).toFloat(), total = total, minSignal = 0.002f)
                 }
-                var sum = 0.0
-                var bassSum = 0.0
-                for (i in 0 until read) {
-                    val x = buffer[i] / 32_768f
-                    lowPass += alpha * (x - lowPass)
-                    sum += x * x
-                    bassSum += lowPass * lowPass
+                // Le micro d'une télécommande se coupe tout seul : on le rouvre s'il n'entend plus rien.
+                if (now - lastSound > 4_000 && now - lastReopen > 4_000) {
+                    runCatching { record.stop() }
+                    record.release()
+                    isOpen = false
+                    val reopened = micTester.open(config).first ?: break
+                    record = reopened
+                    isOpen = true
+                    lastReopen = now
                 }
-                onAnalysis(
-                    bass = sqrt(bassSum / read).toFloat(),
-                    total = sqrt(sum / read).toFloat(),
-                    minSignal = 0.002f,
-                )
             }
-            runCatching { record.stop() }
-            record.release()
+            if (isOpen) {
+                runCatching { record.stop() }
+                record.release()
+            }
         }, "party-mic").apply { start() }
         return null
     }

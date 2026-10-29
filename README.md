@@ -108,13 +108,17 @@ Ouvre « Mode soirée » (ou épingle-le sur l'accueil depuis *Toutes les applis
 |---|---|
 | ◀ ▶ | Source du rythme : **Son du stick**, **Micro**, **Tempo manuel** |
 | ▲ ▼ | Effet : **Arc-en-ciel**, **Flash couleur**, **Pulsation** |
-| OK | En tempo manuel : appuie au rythme de la musique pour caler le tempo |
+| OK | Source Micro : test du micro · Tempo manuel : appuie au rythme pour caler le tempo |
 | Retour | Quitter |
 
 - **Son du stick** : analyse le son joué par le stick lui-même (musique lancée sur la TV,
   par exemple une appli qui continue en arrière-plan). Peut ne rien capter si le son part
   en passthrough (Dolby) vers une barre de son.
-- **Micro** : micro du stick ou de la télécommande, s'il est utilisable en continu.
+- **Micro** (par défaut) : micro de la télécommande ou micro USB. Avec la source Micro,
+  **OK lance un test** (≈ 1 min, avec de la musique) : il essaie toutes les entrées audio
+  du stick, vérifie que le son tient 45 s d'affilée, puis garde la meilleure. Si le micro
+  de la télécommande se coupe, le Mode soirée le rouvre automatiquement. Le détail du test
+  est aussi dans `adb logcat -s MicTest`.
 - **Tempo manuel** : marche toujours, sans aucun son capté.
 
 La première fois, autorise l'accès au micro (demandé à l'écran). Si une source ne capte
