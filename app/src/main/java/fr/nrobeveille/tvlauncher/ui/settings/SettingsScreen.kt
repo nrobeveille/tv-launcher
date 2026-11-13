@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.provider.Settings
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import fr.nrobeveille.tvlauncher.ui.components.BirthdayOverlay
 import fr.nrobeveille.tvlauncher.ui.components.EasterEggOverlay
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
@@ -67,6 +68,9 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
     var versionTaps by remember { mutableIntStateOf(0) }
     var lastVersionTap by remember { mutableLongStateOf(0L) }
     var showEasterEgg by remember { mutableStateOf(false) }
+    var clockTaps by remember { mutableIntStateOf(0) }
+    var lastClockTap by remember { mutableLongStateOf(0L) }
+    var showBirthday by remember { mutableStateOf(false) }
     val shake = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     val version = remember { vm.appRepository.versionName() }
@@ -142,7 +146,19 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
                 "clock",
                 "Format de l'heure",
                 value = if (settings.use24h) "24 h" else "12 h",
-                onClick = { vm.toggleClockFormat() },
+                onClick = {
+                    // 5 appuis d'affilée : surprise d'anniversaire. Les 4 premiers changent le
+                    // format puis le remettent, le 5e lance la surprise sans rien changer.
+                    val now = SystemClock.uptimeMillis()
+                    clockTaps = if (now - lastClockTap < 1_500L) clockTaps + 1 else 1
+                    lastClockTap = now
+                    if (clockTaps >= 5) {
+                        clockTaps = 0
+                        showBirthday = true
+                    } else {
+                        vm.toggleClockFormat()
+                    }
+                },
             ),
         ),
         "Système" to listOf(
@@ -219,6 +235,10 @@ fun SettingsScreen(vm: LauncherViewModel, settings: LauncherSettings) {
                 sections.forEach { (title, entries) -> section(title, entries, registry, vm) }
             }
         }
+    }
+
+    if (showBirthday) {
+        BirthdayOverlay(onDone = { showBirthday = false })
     }
 
     if (showEasterEgg) {
