@@ -342,7 +342,7 @@ private class ConfettiSystem(private val capacity: Int) {
     private val vrot = FloatArray(capacity)
     private val flip = FloatArray(capacity)
     private val vflip = FloatArray(capacity)
-    private val size = FloatArray(capacity)
+    private val sizes = FloatArray(capacity)
     private val sway = FloatArray(capacity)
     private val phase = FloatArray(capacity)
     private val color = IntArray(capacity)
@@ -362,7 +362,7 @@ private class ConfettiSystem(private val capacity: Int) {
         vrot[i] = (random.nextFloat() - 0.5f) * 720f
         flip[i] = random.nextFloat() * 6.28f
         vflip[i] = 4f + random.nextFloat() * 8f
-        size[i] = h * (0.012f + random.nextFloat() * 0.012f)
+        sizes[i] = h * (0.012f + random.nextFloat() * 0.012f)
         sway[i] = h * (0.03f + random.nextFloat() * 0.06f)
         phase[i] = random.nextFloat() * 6.28f
         color[i] = random.nextInt(Festive.size)
@@ -424,7 +424,7 @@ private class ConfettiSystem(private val capacity: Int) {
             if (!alive[i]) continue
             val c = Festive[color[i]].copy(alpha = 0.95f * alpha)
             val p = Offset(x[i], y[i])
-            val s = size[i]
+            val s = sizes[i]
             if (round[i]) {
                 drawCircle(c, s * 0.35f, p)
             } else {
