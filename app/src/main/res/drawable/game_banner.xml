@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bannière 16:9 de Debug Road : circuit imprimé, bus de données, paquet et canard de debug -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Circuit imprimé (haut et bas) -->
+    <path android:fillColor="#FF1F6B47" android:pathData="M0,0h320v60h-320z" />
+    <path android:fillColor="#FF1B6040" android:pathData="M0,132h320v48h-320z" />
+    <path android:fillColor="#88D4AF52" android:pathData="M20,24h90v3h-90z M110,24l14,14l-2,2l-14,-14z M180,150h110v3h-110z M200,40h60v3h-60z" />
+    <!-- Bus de données -->
+    <path android:fillColor="#FF2A2E3B" android:pathData="M0,60h320v72h-320z" />
+    <path android:fillColor="#38FFFFFF" android:pathData="M10,95h22v3h-22z M50,95h22v3h-22z M90,95h22v3h-22z M130,95h22v3h-22z M170,95h22v3h-22z M210,95h22v3h-22z M250,95h22v3h-22z M290,95h22v3h-22z" />
+    <!-- Paquet (camion bleu) -->
+    <path android:fillColor="#FF2F5DBF" android:pathData="M188,72h88v18h-88z" />
+    <path android:fillColor="#FF5E8BEA" android:pathData="M188,64h88v8h-88z" />
+    <path android:fillColor="#FFE8ECF4" android:pathData="M276,66h22v24h-22z" />
+    <path android:fillColor="#FF111318" android:pathData="M206,90m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0 M286,90m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <!-- Canard de debug -->
+    <path android:fillColor="#FFEDB100" android:pathData="M84,104h46v28h-46z" />
+    <path android:fillColor="#FFFFD43B" android:pathData="M84,92h46v12h-46z" />
+    <path android:fillColor="#FFEDB100" android:pathData="M94,74h28v20h-28z" />
+    <path android:fillColor="#FFFFD43B" android:pathData="M94,66h28v8h-28z" />
+    <path android:fillColor="#FFFF8A2A" android:pathData="M102,84h12v6h-12z" />
+    <path android:fillColor="#FF1A1A1A" android:pathData="M100,78m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0 M116,78m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    <path android:strokeColor="#FF1A1A1A" android:strokeWidth="1.5" android:pathData="M96,74h8v8h-8z M112,74h8v8h-8z M104,78h8" />
+</vector>

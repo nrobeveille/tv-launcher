@@ -16,6 +16,7 @@ service en arrière-plan : juste tes applis.
   l'accueil). L'écran s'illumine au rythme de la musique, couleurs concentrées sur les
   bords pour être reprises par un boîtier LED HDMI. Voir plus bas.
 - **Lumières** : appli à part pour piloter les ampoules WiZ du réseau local (voir plus bas).
+- **Debug Road** : jeu de traversée à la télécommande (voir plus bas).
 - **Paramètres** (roue dentée en haut à droite) :
   - Applis de l'accueil (cases à cocher) et Réorganiser
   - Fond d'écran, taille des tuiles, affichage du nom des applis, format de l'heure
@@ -141,6 +142,21 @@ compte ni cloud) : le stick et les ampoules doivent être sur le même réseau.
 Les noms viennent de l'appli WiZ côté cloud et ne sont pas lisibles en local : on les
 choisit ici (« Faire clignoter » aide à savoir laquelle est laquelle).
 
+## Debug Road
+
+Le canard de debug doit avancer le plus loin possible sans se faire écraser.
+
+| Voie | Danger |
+|---|---|
+| Open space (circuit imprimé) | Puces, condensateurs, baies serveur et ventilos bloquent le passage. Des cafés à ramasser. |
+| Bus de données | Paquets HTTP, 404, DNS…, camions TCP / node_modules, UDP qui foncent sans prévenir. |
+| Rivière de café | On ne nage pas : sauter de disquette en barrette de RAM. Sortir de l'écran = overflow. |
+| Pipeline de mise en prod | Le feu clignote, puis la « MEP du vendredi 17h » passe à toute vitesse. |
+
+▲ ◀ ▶ ▼ pour sauter, OK pour relancer après un crash. L'écran avance tout seul de plus en
+plus vite : trop traîner = *408 Request Timeout*. Le score est en lignes de code, avec des
+grades de Stagiaire à Légende 10x, et le record est enregistré.
+
 ## Mises à jour
 
 Dans **Paramètres → Mise à jour**, le launcher interroge l'API GitHub
@@ -199,6 +215,7 @@ app/src/main/java/fr/nrobeveille/tvlauncher/
 ├── update/                  recherche, téléchargement et installation des mises à jour
 ├── party/                   Mode soirée : analyse du son, effets lumineux
 ├── lights/                  Lumières : ampoules WiZ (UDP local)
+├── game/                    Debug Road : moteur, rendu, activité
 └── ui/
     ├── home/                accueil
     ├── allapps/             toutes les applis
