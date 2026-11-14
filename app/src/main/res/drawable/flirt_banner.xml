@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bannière 16:9 de Love.exe : fond de soirée, cœur, chevrons de code -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path android:fillColor="#FF2A0F3F" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FF4B1650" android:pathData="M0,110c60,-30 140,40 320,-10v80h-320z" />
+    <!-- Guirlande -->
+    <path android:fillColor="#FFFF5D8F" android:pathData="M30,22m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FFFFC94D" android:pathData="M80,30m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FF6BE3A4" android:pathData="M130,24m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FF7FB2FF" android:pathData="M190,24m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FFB388FF" android:pathData="M240,30m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path android:fillColor="#FFFF5D8F" android:pathData="M290,22m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <!-- Chevrons < > -->
+    <path android:strokeColor="#FFFFC94D" android:strokeWidth="9" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M92,62l-34,30l34,30 M228,62l34,30l-34,30" />
+    <!-- Cœur -->
+    <path android:fillColor="#FFFF5D8F"
+        android:pathData="M160,138c-40,-26 -58,-46 -58,-68c0,-16 12,-28 28,-28c12,0 22,7 30,18c8,-11 18,-18 30,-18c16,0 28,12 28,28c0,22 -18,42 -58,68z" />
+    <path android:fillColor="#55FFFFFF" android:pathData="M124,60c4,-6 12,-8 18,-6c-8,2 -14,8 -16,16z" />
+</vector>

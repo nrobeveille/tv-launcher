@@ -17,6 +17,8 @@ service en arrière-plan : juste tes applis.
   bords pour être reprises par un boîtier LED HDMI. Voir plus bas.
 - **Lumières** : appli à part pour piloter les ampoules WiZ du réseau local (voir plus bas).
 - **Debug Road** : jeu de traversée à la télécommande (voir plus bas).
+- **Love.exe** : jeu de drague parodique et tout public pour l'anniversaire du « birthday
+  boy » : trois rencontres, des répliques à choisir, un thermomètre qui monte… ou des râteaux.
 - **Paramètres** (roue dentée en haut à droite) :
   - Applis de l'accueil (cases à cocher) et Réorganiser
   - Fond d'écran, taille des tuiles, affichage du nom des applis, format de l'heure
@@ -216,6 +218,7 @@ app/src/main/java/fr/nrobeveille/tvlauncher/
 ├── party/                   Mode soirée : analyse du son, effets lumineux
 ├── lights/                  Lumières : ampoules WiZ (UDP local)
 ├── game/                    Debug Road : moteur, rendu, activité
+├── flirt/                   Love.exe : histoire, dessins des personnages, écran
 └── ui/
     ├── home/                accueil
     ├── allapps/             toutes les applis
